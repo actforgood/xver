@@ -39,7 +39,7 @@ EOM
 cat > "go.mod" << EOM
 module demoapp
 
-go 1.26
+go 1.25
 
 replace github.com/actforgood/xver v1.0.0 => ../../
 
