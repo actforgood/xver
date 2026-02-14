@@ -8,8 +8,8 @@ package xver_test
 import (
 	"reflect"
 	"runtime/debug"
-	"sync"
 	"testing"
+	"testing/synctest"
 
 	"github.com/actforgood/xver"
 )
@@ -56,25 +56,23 @@ func TestInformation_concurrency(t *testing.T) {
 	// Note: this test does not expect much of a thing; it is meant to
 	// see if something goes wrong in `test -race ...` context.
 
-	// arrange
-	wg := sync.WaitGroup{}
-	goroutinesNo := 50
-	wg.Add(goroutinesNo)
-	subject := xver.Information
+	synctest.Test(t, func(t *testing.T) {
+		// arrange
+		const goroutinesNo = 50
+		subject := xver.Information
 
-	// act
-	for range goroutinesNo {
-		go func() {
-			actual := subject()
+		// act
+		for range goroutinesNo {
+			go func() {
+				actual := subject()
 
-			// assert
-			if len(actual.Build.Go) == 0 {
-				t.Errorf("expected go version to be set")
-			}
+				// assert
+				if len(actual.Build.Go) == 0 {
+					t.Errorf("expected go version to be set")
+				}
+			}()
+		}
 
-			wg.Done()
-		}()
-	}
-
-	wg.Wait()
+		synctest.Wait()
+	})
 }
